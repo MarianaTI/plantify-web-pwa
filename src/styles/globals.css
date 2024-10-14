@@ -1,33 +1,14 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
   padding: 0;
   margin: 0;
+  font-family: "Montserrat", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  margin: auto;
+  scrollbar-color: #c0c0c0 white;
 }
 
 a {
@@ -35,8 +16,38 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+* {
+  box-sizing: border-box;
+  position: relative
+}
+
+:root{
+  --neutral: #fff;
+  --default: #1f1f1f;
+  --default-inverse: #ccc;
+  --secondary: #3b3b3b;
+  --secondary-inverse: #c7c7c7;
+  --tertiary: #575757;
+  --tertiary-inverse: #bebebe;
+
+  --primary-500: #3F4637;
+  --primary-400: #5F6854;
+  --primary-300: #808A73;
+  --primary-200: #A1AC94;
+  --primary-100: #C4CEB7;
+  --primary-50: #E7F0DC;
+
+  --secondary-500: #1A5319;
+  --secondary-400: #388636;
+  --secondary-300: #60B95F;
+  --secondary-200: #93EC92;
+  --secondary-100: #CAFFC9;
+  --secondary-50: #F5FFF5;
+
+  --tertiary-500: #314528;
+  --tertiary-400: #506E44;
+  --tertiary-300: #729762;
+  --tertiary-200: #96C083;
+  --tertiary-100: #BBE9A7;
+  --tertiary-50: #F2F7F0;
 }
