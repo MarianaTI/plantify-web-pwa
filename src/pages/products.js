@@ -1,16 +1,16 @@
 import { useEffect } from 'react';
 import { usePageContent } from '@/context/PageContentContext';
 
-export default function Home() {
+export default function Products() {
   const { setPageContent } = usePageContent();
 
   useEffect(() => {
-    setPageContent('Bienvenido a la página de inicio. Aquí puedes encontrar la información más reciente.');
+    setPageContent('Aquí están nuestros productos. Explora nuestra variedad de artículos.');
   }, [setPageContent]);
 
   return (
     <div>
-      <h1>Página de Inicio</h1>
+      <h1>Productos</h1>
       <p>Contenido estático aquí.</p>
     </div>
   );
