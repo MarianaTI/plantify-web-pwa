@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import StarsComponent from "@/components/Stars";
 import UpdateProductUseCase from "@/application/usecases/UpdateProductUseCase";
+import CreateProductUseCase from "@/application/usecases/CreateProductUseCase";
 
 const style = {
   position: "absolute",
@@ -36,7 +37,6 @@ export default function Home() {
     price: 0,
     stars: 0,
   });
-
   const productRepo = new ProductRepo();
   const getAllProductsUseCase = new GetAllProductUseCase(productRepo);
 
@@ -90,13 +90,55 @@ export default function Home() {
     }
   };
 
+  const [openCreate, setOpenCreate] = useState(false);
+  const [newProductData, setNewProductData] = useState({
+    name: "",
+    description: "",
+    price: 0,
+    stars: 0,
+  });
+
+  const handleOpenCreate = () => {
+    setNewProductData({
+      name: "",
+      description: "",
+      price: 0,
+      stars: 0,
+    });
+    setOpenCreate(true);
+  };
+
+  const handleCloseCreate = () => setOpenCreate(false);
+
+  const handleNewProductChange = (e) => {
+    const { name, value } = e.target;
+    setNewProductData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const onSubmitCreate = async (event) => {
+    event.preventDefault();
+
+    const createProductUseCase = new CreateProductUseCase(productRepo);
+
+    try {
+      const response = await createProductUseCase.run(newProductData);
+      console.log("Producto creado:", response);
+      fetchProducts();
+      handleCloseCreate();
+    } catch (error) {
+      console.error("Error al crear el producto:", error);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
 
   return (
     <div>
-      <div>{/* <Button onClick={handleOpen}>Open modal</Button> */}</div>
+      <div>
+        <Button onClick={handleOpenCreate}>Crear Nuevo Producto</Button>
+      </div>
       <div>
         {products.map((product, index) => (
           <Card key={index}>
@@ -180,6 +222,66 @@ export default function Home() {
                 <Button sx={{ mt: 2 }}>Cancelar</Button>
               </>
             )}
+          </form>
+        </Box>
+      </Modal>
+      <Modal
+        open={openCreate}
+        onClose={handleCloseCreate}
+        aria-labelledby="modal-create-product-title"
+        aria-describedby="modal-create-product-description"
+      >
+        <Box sx={style}>
+          <form onSubmit={onSubmitCreate}>
+            <Typography
+              id="modal-create-product-title"
+              variant="h6"
+              component="h2"
+            >
+              Crear Nuevo Producto
+            </Typography>
+            <TextField
+              fullWidth
+              label="Nombre"
+              name="name"
+              value={newProductData.name}
+              onChange={handleNewProductChange}
+              sx={{ mt: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Descripción"
+              name="description"
+              multiline
+              rows={4}
+              value={newProductData.description}
+              onChange={handleNewProductChange}
+              sx={{ mt: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Precio"
+              name="price"
+              type="number"
+              value={newProductData.price}
+              onChange={handleNewProductChange}
+              sx={{ mt: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Estrellas"
+              name="stars"
+              type="number"
+              value={newProductData.stars}
+              onChange={handleNewProductChange}
+              sx={{ mt: 2 }}
+            />
+            <Button sx={{ mt: 2 }} type="submit">
+              Guardar
+            </Button>
+            <Button sx={{ mt: 2 }} onClick={handleCloseCreate}>
+              Cancelar
+            </Button>
           </form>
         </Box>
       </Modal>

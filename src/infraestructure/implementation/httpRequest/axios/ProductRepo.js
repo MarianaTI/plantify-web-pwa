@@ -17,6 +17,29 @@ class ProductRepo extends IProductRepo {
     }
   }
 
+  async create(product) {
+    try {
+      const formData = new FormData();
+      formData.append("name", product.name);
+      formData.append("description", product.description);
+      formData.append("price", product.price);
+      formData.append("stars", product.stars);
+      const response = await axios.post(
+        `${this.url}/create`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al agregar el producto:", error);
+      throw error;
+    }
+  }
+
   async update(product) {
     try {
       const formData = new FormData();
