@@ -7,14 +7,19 @@ import {
   Card,
   CardActions,
   CardContent,
+  createTheme,
+  Fab,
+  Grid,
   Modal,
   TextField,
+  ThemeProvider,
   Typography,
 } from "@mui/material";
 import StarsComponent from "@/components/Stars";
 import UpdateProductUseCase from "@/application/usecases/UpdateProductUseCase";
 import CreateProductUseCase from "@/application/usecases/CreateProductUseCase";
 import DeleteProductUseCase from "@/application/usecases/DeleteProductUseCase";
+import AddIcon from "@mui/icons-material/Add";
 
 const style = {
   position: "absolute",
@@ -23,10 +28,26 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  border: "2px solid #000",
   boxShadow: 24,
   p: 4,
+  borderRadius: "12px", 
 };
+
+const theme = createTheme({
+  typography: {
+    fontFamily: "Poppins, sans-serif",
+    h5: {
+      color: "#1f1f1f",
+      fontSize: "22px",
+      fontWeight: 600,
+    },
+    body2: {
+      color: "#1f1f1f",
+      fontSize: "14px",
+      fontWeight: 500,
+    },
+  },
+});
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -38,6 +59,7 @@ export default function Home() {
     price: 0,
     stars: 0,
   });
+
   const productRepo = new ProductRepo();
   const getAllProductsUseCase = new GetAllProductUseCase(productRepo);
   const deleteProductUseCase = new DeleteProductUseCase(productRepo);
@@ -147,34 +169,78 @@ export default function Home() {
   }, []);
 
   return (
-    <div>
-      <div>
-        <Button onClick={handleOpenCreate}>Crear Nuevo Producto</Button>
-      </div>
-      <div>
-        {products.map((product, index) => (
-          <Card key={index}>
-            <CardContent>
-              <Typography gutterBottom variant="h5" component="div">
-                {product.name}
-              </Typography>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                {product.description}
-              </Typography>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                $ {product.price}.00
-              </Typography>
-              <StarsComponent rating={product.stars} />
-            </CardContent>
-            <CardActions>
-              <Button size="small" onClick={() => handleDeleteProduct(product._id)}>Eliminar</Button>
-              <Button size="small" onClick={() => handleOpen(product)}>
-                Editar
-              </Button>
-            </CardActions>
-          </Card>
-        ))}
-      </div>
+    <ThemeProvider theme={theme}>
+      <Grid container spacing={2}>
+        {products.length === 0 ? (
+          <Grid item xs={12}>
+            <Typography variant="h6" align="center" color="#bebebe">
+              No hay productos disponibles.
+            </Typography>
+          </Grid>
+        ) : (
+          products.map((product, index) => (
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <Card>
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="div">
+                    {product.name}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    {product.description}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    $ {product.price}
+                  </Typography>
+                  <StarsComponent rating={product.stars} />
+                </CardContent>
+                <CardActions>
+                  <Button
+                    size="small"
+                    onClick={() => handleDeleteProduct(product._id)}
+                    sx={{
+                      color: "#388636",
+                      "&:hover": {
+                        backgroundColor: "#e6f0e6",
+                      },
+                    }}
+                  >
+                    Eliminar
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={() => handleOpen(product)}
+                    sx={{
+                      color: "#388636",
+                      "&:hover": {
+                        backgroundColor: "#e6f0e6",
+                      },
+                    }}
+                  >
+                    Editar
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))
+        )}
+      </Grid>
+      <Fab
+        color="#1A5319"
+        aria-label="add"
+        onClick={handleOpenCreate}
+        sx={{
+          position: "fixed",
+          bottom: 16,
+          right: 16,
+          backgroundColor: "#388636",
+          color: "#FFFFFF",
+          "&:hover": {
+            backgroundColor: "#1A5319",
+          },
+        }}
+      >
+        <AddIcon />
+      </Fab>
       <Modal
         open={open}
         onClose={handleClose}
@@ -198,7 +264,22 @@ export default function Home() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  sx={{ mt: 2 }}
+                  sx={{
+                    mt: 2,
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused fieldset": {
+                        borderColor: "green", 
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "green", 
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      "&.Mui-focused": {
+                        color: "green", 
+                      },
+                    },
+                  }}
                 />
                 <TextField
                   fullWidth
@@ -208,30 +289,104 @@ export default function Home() {
                   rows={4}
                   value={formData.description}
                   onChange={handleChange}
-                  sx={{ mt: 2 }}
+                  sx={{
+                    mt: 2,
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused fieldset": {
+                        borderColor: "green", 
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "green", 
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      "&.Mui-focused": {
+                        color: "green", 
+                      },
+                    },
+                  }}
                 />
                 <TextField
                   fullWidth
                   label="Precio"
                   name="price"
                   type="number"
+                  inputProps={{
+                    min: 0,
+                    max: 1000,
+                    step: 0.01,
+                  }}
                   value={formData.price}
                   onChange={handleChange}
-                  sx={{ mt: 2 }}
+                  sx={{
+                    mt: 2,
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused fieldset": {
+                        borderColor: "green", 
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "green", 
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      "&.Mui-focused": {
+                        color: "green", 
+                      },
+                    },
+                  }}
                 />
                 <TextField
                   fullWidth
                   label="Estrellas"
                   name="stars"
                   type="number"
+                  inputProps={{
+                    min: 0,
+                    max: 5,
+                  }}
                   value={formData.stars}
                   onChange={handleChange}
-                  sx={{ mt: 2 }}
+                  sx={{
+                    mt: 2,
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused fieldset": {
+                        borderColor: "green", 
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "green", 
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      "&.Mui-focused": {
+                        color: "green", 
+                      },
+                    },
+                  }}
                 />
-                <Button sx={{ mt: 2 }} type="submit">
+                <Button
+                  sx={{
+                    mt: 2,
+                    color: "#388636",
+                    "&:hover": {
+                      backgroundColor: "#e6f0e6",
+                    },
+                  }}
+                  type="submit"
+                >
                   Guardar
                 </Button>
-                <Button sx={{ mt: 2 }}>Cancelar</Button>
+                <Button
+                  sx={{
+                    mt: 2,
+                    color: "#388636",
+                    "&:hover": {
+                      backgroundColor: "#e6f0e6",
+                    },
+                  }}
+                  onClick={handleClose}
+                >
+                  Cancelar
+                </Button>
               </>
             )}
           </form>
@@ -258,7 +413,22 @@ export default function Home() {
               name="name"
               value={newProductData.name}
               onChange={handleNewProductChange}
-              sx={{ mt: 2 }}
+              sx={{
+                mt: 2,
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
+                    borderColor: "green", 
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "green", 
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  "&.Mui-focused": {
+                    color: "green", 
+                  },
+                },
+              }}
             />
             <TextField
               fullWidth
@@ -268,35 +438,107 @@ export default function Home() {
               rows={4}
               value={newProductData.description}
               onChange={handleNewProductChange}
-              sx={{ mt: 2 }}
+              sx={{
+                mt: 2,
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
+                    borderColor: "green", 
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "green", 
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  "&.Mui-focused": {
+                    color: "green", 
+                  },
+                },
+              }}
             />
             <TextField
               fullWidth
               label="Precio"
               name="price"
               type="number"
+              inputProps={{
+                min: 0,
+                max: 1000,
+                step: 0.01,
+              }}
               value={newProductData.price}
               onChange={handleNewProductChange}
-              sx={{ mt: 2 }}
+              sx={{
+                mt: 2,
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
+                    borderColor: "green", 
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "green", 
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  "&.Mui-focused": {
+                    color: "green", 
+                  },
+                },
+              }}
             />
             <TextField
               fullWidth
               label="Estrellas"
               name="stars"
               type="number"
+              inputProps={{
+                min: 0,
+                max: 5,
+              }}
               value={newProductData.stars}
               onChange={handleNewProductChange}
-              sx={{ mt: 2 }}
+              sx={{
+                mt: 2,
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
+                    borderColor: "green", 
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "green", 
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  "&.Mui-focused": {
+                    color: "green", 
+                  },
+                },
+              }}
             />
-            <Button sx={{ mt: 2 }} type="submit">
+            <Button
+              sx={{
+                mt: 2,
+                color: "#388636",
+                "&:hover": {
+                  backgroundColor: "#e6f0e6",
+                },
+              }}
+              type="submit"
+            >
               Guardar
             </Button>
-            <Button sx={{ mt: 2 }} onClick={handleCloseCreate}>
+            <Button
+              sx={{
+                mt: 2,
+                color: "#388636",
+                "&:hover": {
+                  backgroundColor: "#e6f0e6",
+                },
+              }}
+              onClick={handleCloseCreate}
+            >
               Cancelar
             </Button>
           </form>
         </Box>
       </Modal>
-    </div>
+    </ThemeProvider>
   );
 }

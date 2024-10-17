@@ -5,12 +5,20 @@ import { useTheme } from "@mui/material/styles";
 const ResponsiveNavbar = ({ children }) => {
   const theme = useTheme();
   return (
-    <div style={{ display: "flex" }}>
+    <div>
       <CssBaseline />
-      <AppBar position="fixed" sx={{ zIndex: theme.zIndex.drawer + 1 }}>
+      <AppBar
+        position="fixed"
+        sx={{ zIndex: theme.zIndex.drawer + 1, backgroundColor: "#1A5319" }}
+      >
         <Toolbar>
-          <IconButton color="inherit" aria-label="menu" edge="start" sx={{ mr: 2 }}>
-            <span>Plantify</span>
+          <IconButton
+            color="inherit"
+            aria-label="menu"
+            edge="start"
+            sx={{ mr: 2 }}
+          >
+            <span style={{ fontFamily: "Poppins, sans-serif", fontWeight: 600 }}>Plantify</span>
           </IconButton>
         </Toolbar>
       </AppBar>
