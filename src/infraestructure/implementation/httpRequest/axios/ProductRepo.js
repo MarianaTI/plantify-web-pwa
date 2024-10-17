@@ -62,6 +62,11 @@ class ProductRepo extends IProductRepo {
       throw error;
     }
   }
+
+  async delete(_id) {
+    const response = await axios.delete(`${this.url}/delete/${_id}`);
+    return response;
+  }
 }
 
 export default ProductRepo;

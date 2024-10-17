@@ -14,6 +14,7 @@ import {
 import StarsComponent from "@/components/Stars";
 import UpdateProductUseCase from "@/application/usecases/UpdateProductUseCase";
 import CreateProductUseCase from "@/application/usecases/CreateProductUseCase";
+import DeleteProductUseCase from "@/application/usecases/DeleteProductUseCase";
 
 const style = {
   position: "absolute",
@@ -39,6 +40,7 @@ export default function Home() {
   });
   const productRepo = new ProductRepo();
   const getAllProductsUseCase = new GetAllProductUseCase(productRepo);
+  const deleteProductUseCase = new DeleteProductUseCase(productRepo);
 
   const handleOpen = (product) => {
     setSelectedProduct(product);
@@ -130,6 +132,16 @@ export default function Home() {
     }
   };
 
+  const handleDeleteProduct = async (productId) => {
+    try {
+      await deleteProductUseCase.run(productId);
+      console.log(`Producto con ID ${productId} eliminado`);
+      fetchProducts();
+    } catch (error) {
+      console.error("Error al eliminar el producto: ", error);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -155,7 +167,7 @@ export default function Home() {
               <StarsComponent rating={product.stars} />
             </CardContent>
             <CardActions>
-              <Button size="small">Eliminar</Button>
+              <Button size="small" onClick={() => handleDeleteProduct(product._id)}>Eliminar</Button>
               <Button size="small" onClick={() => handleOpen(product)}>
                 Editar
               </Button>
