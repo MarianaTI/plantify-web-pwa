@@ -1,5 +1,5 @@
 import ProductRepo from "@/infraestructure/implementation/httpRequest/axios/ProductRepo";
-import GetAllProductUseCase from "@/application/usecases/product/GetAllProductUseCase";
+import GetAllProductUseCase from "@/application/usecases/GetAllProductUseCase";
 import { useEffect, useState } from "react";
 import {
   Box,
@@ -7,11 +7,12 @@ import {
   Card,
   CardActions,
   CardContent,
-  CardMedia,
   Modal,
+  TextField,
   Typography,
 } from "@mui/material";
 import StarsComponent from "@/components/Stars";
+import UpdateProductUseCase from "@/application/usecases/UpdateProductUseCase";
 
 const style = {
   position: "absolute",
@@ -29,16 +30,36 @@ export default function Home() {
   const [products, setProducts] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    price: 0,
+    stars: 0,
+  });
+
+  const productRepo = new ProductRepo();
+  const getAllProductsUseCase = new GetAllProductUseCase(productRepo);
 
   const handleOpen = (product) => {
-    setSelectedProduct(product); 
+    setSelectedProduct(product);
+    setFormData({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      stars: product.stars,
+    });
     setOpen(true);
   };
 
   const handleClose = () => setOpen(false);
 
-  const productRepo = new ProductRepo();
-  const getAllProductsUseCase = new GetAllProductUseCase(productRepo);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "category") {
+      console.log("ID de categoría seleccionada:", value);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -46,6 +67,26 @@ export default function Home() {
       setProducts(response.response.products);
     } catch (error) {
       console.error("Error fetching products:", error);
+    }
+  };
+
+  const onSubmitUpdate = async (event) => {
+    event.preventDefault();
+
+    const updatedProduct = {
+      _id: selectedProduct._id,
+      ...formData,
+    };
+
+    const updateProductUseCase = new UpdateProductUseCase(productRepo);
+
+    try {
+      const response = await updateProductUseCase.run(updatedProduct);
+      console.log("Editado: ", response);
+      fetchProducts();
+      handleClose();
+    } catch (error) {
+      console.error("Error updating product: ", error);
     }
   };
 
@@ -59,11 +100,6 @@ export default function Home() {
       <div>
         {products.map((product, index) => (
           <Card key={index}>
-            <CardMedia
-              sx={{ height: 200 }}
-              image={product.image.secureUrl}
-              title="green iguana"
-            />
             <CardContent>
               <Typography gutterBottom variant="h5" component="div">
                 {product.name}
@@ -75,9 +111,6 @@ export default function Home() {
                 $ {product.price}.00
               </Typography>
               <StarsComponent rating={product.stars} />
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                {product.category}
-              </Typography>
             </CardContent>
             <CardActions>
               <Button size="small">Eliminar</Button>
@@ -95,35 +128,59 @@ export default function Home() {
         aria-describedby="modal-product-description"
       >
         <Box sx={style}>
-          {selectedProduct && (
-            <>
-              <Typography id="modal-product-title" variant="h6" component="h2">
-                {selectedProduct.name}
-              </Typography>
-              <CardMedia
-                sx={{ height: 200, marginTop: "10px" }}
-                image={selectedProduct.image.secureUrl}
-                title={selectedProduct.name}
-              />
-              <Typography
-                id="modal-product-description"
-                sx={{ mt: 2 }}
-                variant="body2"
-              >
-                {selectedProduct.description}
-              </Typography>
-              <Typography sx={{ mt: 2 }}>
-                Price: $ {selectedProduct.price}.00
-              </Typography>
-              <StarsComponent rating={selectedProduct.stars} />
-              <Typography sx={{ mt: 2 }}>
-                Category: {selectedProduct.category}
-              </Typography>
-              <Button onClick={handleClose} sx={{ mt: 2 }}>
-                Cerrar
-              </Button>
-            </>
-          )}
+          <form onSubmit={onSubmitUpdate}>
+            {selectedProduct && (
+              <>
+                <Typography
+                  id="modal-product-title"
+                  variant="h6"
+                  component="h2"
+                >
+                  Editar Producto
+                </Typography>
+                <TextField
+                  fullWidth
+                  label="Nombre"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  sx={{ mt: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Descripción"
+                  name="description"
+                  multiline
+                  rows={4}
+                  value={formData.description}
+                  onChange={handleChange}
+                  sx={{ mt: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Precio"
+                  name="price"
+                  type="number"
+                  value={formData.price}
+                  onChange={handleChange}
+                  sx={{ mt: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Estrellas"
+                  name="stars"
+                  type="number"
+                  value={formData.stars}
+                  onChange={handleChange}
+                  sx={{ mt: 2 }}
+                />
+                <Button sx={{ mt: 2 }} type="submit">
+                  Guardar
+                </Button>
+                <Button sx={{ mt: 2 }}>Cancelar</Button>
+              </>
+            )}
+          </form>
         </Box>
       </Modal>
     </div>

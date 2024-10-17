@@ -20,12 +20,10 @@ class ProductRepo extends IProductRepo {
   async update(product) {
     try {
       const formData = new FormData();
-      formData.append("name", blog.name);
-      formData.append("description", blog.description);
-      formData.append("price", blog.price);
-      formData.append("stars", blog.stars);
-      formData.append("id_category", blog.id_category);
-      formData.append("image", blog.image);
+      formData.append("name", product.name);
+      formData.append("description", product.description);
+      formData.append("price", product.price);
+      formData.append("stars", product.stars);
       const response = await axios.put(
         `${this.url}/update/${product._id}`,
         formData,
