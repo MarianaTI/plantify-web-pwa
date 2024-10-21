@@ -4,7 +4,7 @@ import axios from "axios";
 class ProductRepo extends IProductRepo {
   constructor() {
     super();
-    this.url = "http://localhost:3002/api/product";
+    this.url = "https://plantify-ecommerce-api.onrender.com/api/product";
   }
 
   async getAll() {
