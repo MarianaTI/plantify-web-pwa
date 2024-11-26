@@ -16,14 +16,19 @@ import {
   ThemeProvider,
   Typography,
 } from "@mui/material";
+import Badge from "@mui/material/Badge";
 import StarsComponent from "@/components/Stars";
 import UpdateProductUseCase from "@/application/usecases/UpdateProductUseCase";
 import CreateProductUseCase from "@/application/usecases/CreateProductUseCase";
 import DeleteProductUseCase from "@/application/usecases/DeleteProductUseCase";
 import AddIcon from "@mui/icons-material/Add";
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import Loader from "@/components/Loader";
-import { DescriptionStyled, NotificationContainer, RowStyled } from "@/styles/Index.style";
+import {
+  DescriptionStyled,
+  NotificationContainer,
+  RowStyled,
+} from "@/styles/Index.style";
 import GetTotalProductUseCase from "@/application/usecases/GetTotalProductUseCase";
 
 const style = {
@@ -68,6 +73,7 @@ export default function Home() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(9);
+  const [notifications, setNotifications] = useState(0);
 
   const productRepo = new ProductRepo();
   const getAllProductsUseCase = new GetAllProductUseCase(productRepo);
@@ -99,7 +105,7 @@ export default function Home() {
     try {
       const response = await getAllProductsUseCase.run();
       setProducts(response.response.products);
-      console.log('productos: ', response.response.products);
+      console.log("productos: ", response.response.products);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
@@ -109,7 +115,7 @@ export default function Home() {
     try {
       const response = await getTotalProductUseCase.run();
       setTotalProducts(response);
-      console.log('Total de productos: ', response);
+      console.log("Total de productos: ", response);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
@@ -117,7 +123,10 @@ export default function Home() {
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+  const currentProducts = products.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -176,8 +185,9 @@ export default function Home() {
     try {
       const response = await createProductUseCase.run(newProductData);
       console.log("Producto creado:", response);
-      fetchProducts();
-      fetchTotalProducts();
+      await fetchProducts();
+      await fetchTotalProducts();
+      setNotifications((prev) => prev + 1);
       handleCloseCreate();
     } catch (error) {
       console.error("Error al crear el producto:", error);
@@ -192,6 +202,10 @@ export default function Home() {
     } catch (error) {
       console.error("Error al eliminar el producto: ", error);
     }
+  };
+
+  const clearNotifications = () => {
+    setNotifications(0); 
   };
 
   useEffect(() => {
@@ -217,7 +231,7 @@ export default function Home() {
             alignItems: "center",
             height: "100vh",
           }}
-          >
+        >
           <Loader />
         </div>
       ) : (
@@ -225,7 +239,14 @@ export default function Home() {
           <RowStyled>
             <h1>Bienvenido a Platify 🪴</h1>
             <NotificationContainer>
-              <NotificationsIcon/>
+              <Badge
+                badgeContent={notifications}
+                color="secondary"
+                onClick={clearNotifications}
+                style={{ cursor: "pointer" }}
+              >
+                <NotificationsIcon />
+              </Badge>
             </NotificationContainer>
           </RowStyled>
           <Grid container spacing={2}>
@@ -243,8 +264,7 @@ export default function Home() {
                       <Typography gutterBottom variant="h5" component="div">
                         {product.name}
                       </Typography>
-                      <DescriptionStyled
-                      >
+                      <DescriptionStyled>
                         {product.description}
                       </DescriptionStyled>
                       <Typography
@@ -294,8 +314,8 @@ export default function Home() {
               color="primary"
               sx={{
                 "& .Mui-selected": {
-                  backgroundColor: "#1A5319"
-                }
+                  backgroundColor: "#1A5319",
+                },
               }}
             />
           </Box>

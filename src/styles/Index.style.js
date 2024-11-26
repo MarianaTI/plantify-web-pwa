@@ -23,4 +23,9 @@ export const NotificationContainer = styled.div`
   height: 42px;
   border-radius: 50%;
   color: var(--neutral);
+  position: relative;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.8;
+  }
 `;
