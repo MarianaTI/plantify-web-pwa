@@ -128,13 +128,20 @@ export default function Home() {
   };
 
   const fetchProducts = async () => {
-    try {
-      const response = await getAllProductsUseCase.run();
-      setProducts(response.response.products);
-      console.log("productos: ", response.response.products);
-    } catch (error) {
-      console.error("Error fetching products:", error);
+    if (isOnline) {
+      try {
+        const response = await getAllProductsUseCase.run();
+        setProducts(response.response.products);
+        console.log("productos: ", response.response.products);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    } else {
+      const offlineProducts =
+        JSON.parse(localStorage.getItem("offlineProducts")) || [];
+      setProducts(offlineProducts);
     }
+    setIsLoading(false);
   };
 
   const fetchTotalProducts = async () => {
@@ -203,20 +210,36 @@ export default function Home() {
     setNewProductData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const createProductUseCase = new CreateProductUseCase(productRepo);
+
   const onSubmitCreate = async (event) => {
     event.preventDefault();
-    
-    const createProductUseCase = new CreateProductUseCase(productRepo);
 
-    try {
-      const response = await createProductUseCase.run(newProductData);
-      console.log("Producto creado:", response);
-      await fetchProducts();
-      await fetchTotalProducts();
-      setNotifications((prev) => prev + 1);
+    if (isOnline) {
+      try {
+        const response = await createProductUseCase.run(newProductData);
+        console.log("Producto creado:", response);
+        await fetchProducts();
+        await fetchTotalProducts();
+        setNotifications((prev) => prev + 1);
+        handleCloseCreate();
+      } catch (error) {
+        console.error("Error al crear el producto:", error);
+      }
+    } else {
+      const offlineProducts =
+        JSON.parse(localStorage.getItem("offlineProducts")) || [];
+      offlineProducts.push({
+        ...newProductData,
+        id: Date.now(),
+        offline: true,
+      });
+      localStorage.setItem("offlineProducts", JSON.stringify(offlineProducts));
+      fetchProducts();
       handleCloseCreate();
-    } catch (error) {
-      console.error("Error al crear el producto:", error);
+      toast.success(
+        "Cliente guardado localmente. Sincronizará al estar en línea."
+      );
     }
   };
 
@@ -237,7 +260,30 @@ export default function Home() {
   useEffect(() => {
     fetchProducts();
     fetchTotalProducts();
-  }, []);
+  }, [isOnline]);
+
+  useEffect(() => {
+    const syncOfflineData = async () => {
+      const offlineProducts =
+        JSON.parse(localStorage.getItem("offlineProducts")) || [];
+      for (const products of offlineProducts) {
+        try {
+          const response = await createProductUseCase.run(products);
+          console.log("Producto creado:", response);
+          await fetchProducts();
+          await fetchTotalProducts();
+          setNotifications((prev) => prev + 1);
+          handleCloseCreate();
+        } catch (error) {
+          console.error("Error al sincronizar cliente:", products);
+        }
+      }
+      localStorage.removeItem("offlineProducts");
+      fetchProducts();
+    };
+
+    syncOfflineData();
+  }, [isOnline]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -246,12 +292,12 @@ export default function Home() {
 
     return () => clearTimeout(timer);
   }, []);
-  
+
   useEffect(() => {
     toast(isOnline ? "Estás en línea" : "Estás sin conexión", {
       icon: isOnline ? "✅" : "⚠️",
       style: {
-        backgroundColor: isOnline ? "#4caf50" : "#f44336", 
+        backgroundColor: isOnline ? "#4caf50" : "#f44336",
         color: "white",
       },
     });
