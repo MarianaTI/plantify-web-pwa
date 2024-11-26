@@ -3,6 +3,8 @@ import { PageContentProvider } from "@/context/PageContentContext";
 import ResponsiveDrawer from "@/layout";
 import "@/styles/globals.css";
 import Head from "next/head";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function App({ Component, pageProps }) {
   usePullToRefresh();
@@ -18,6 +20,14 @@ export default function App({ Component, pageProps }) {
       </Head>
       <ResponsiveDrawer>
         <Component {...pageProps} />
+        <ToastContainer
+            position="top-center"
+            autoClose={2000}
+            hideProgressBar
+            closeOnClick
+            newestOnTop
+            style={{ fontSize: "14px", fontFamily: "Poppins" }}
+          />
       </ResponsiveDrawer>
     </PageContentProvider>
   );

@@ -30,6 +30,8 @@ import {
   RowStyled,
 } from "@/styles/Index.style";
 import GetTotalProductUseCase from "@/application/usecases/GetTotalProductUseCase";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const style = {
   position: "absolute",
@@ -59,6 +61,29 @@ const theme = createTheme({
   },
 });
 
+const useOnlineStatus = () => {
+  const [isOnline, setIsOnline] = useState(
+    typeof window !== "undefined" && navigator.onLine
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  return isOnline;
+};
+
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(null);
@@ -74,6 +99,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(9);
   const [notifications, setNotifications] = useState(0);
+  const isOnline = useOnlineStatus();
 
   const productRepo = new ProductRepo();
   const getAllProductsUseCase = new GetAllProductUseCase(productRepo);
@@ -179,7 +205,7 @@ export default function Home() {
 
   const onSubmitCreate = async (event) => {
     event.preventDefault();
-
+    
     const createProductUseCase = new CreateProductUseCase(productRepo);
 
     try {
@@ -205,7 +231,7 @@ export default function Home() {
   };
 
   const clearNotifications = () => {
-    setNotifications(0); 
+    setNotifications(0);
   };
 
   useEffect(() => {
@@ -220,6 +246,16 @@ export default function Home() {
 
     return () => clearTimeout(timer);
   }, []);
+  
+  useEffect(() => {
+    toast(isOnline ? "Estás en línea" : "Estás sin conexión", {
+      icon: isOnline ? "✅" : "⚠️",
+      style: {
+        backgroundColor: isOnline ? "#4caf50" : "#f44336", 
+        color: "white",
+      },
+    });
+  }, [isOnline]);
 
   return (
     <div>
