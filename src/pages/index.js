@@ -21,8 +21,10 @@ import UpdateProductUseCase from "@/application/usecases/UpdateProductUseCase";
 import CreateProductUseCase from "@/application/usecases/CreateProductUseCase";
 import DeleteProductUseCase from "@/application/usecases/DeleteProductUseCase";
 import AddIcon from "@mui/icons-material/Add";
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import Loader from "@/components/Loader";
-import { DescriptionStyled } from "@/styles/Index.style";
+import { DescriptionStyled, NotificationContainer, RowStyled } from "@/styles/Index.style";
+import GetTotalProductUseCase from "@/application/usecases/GetTotalProductUseCase";
 
 const style = {
   position: "absolute",
@@ -54,6 +56,7 @@ const theme = createTheme({
 
 export default function Home() {
   const [products, setProducts] = useState([]);
+  const [totalProducts, setTotalProducts] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -68,6 +71,7 @@ export default function Home() {
 
   const productRepo = new ProductRepo();
   const getAllProductsUseCase = new GetAllProductUseCase(productRepo);
+  const getTotalProductUseCase = new GetTotalProductUseCase(productRepo);
   const deleteProductUseCase = new DeleteProductUseCase(productRepo);
 
   const handleOpen = (product) => {
@@ -95,6 +99,17 @@ export default function Home() {
     try {
       const response = await getAllProductsUseCase.run();
       setProducts(response.response.products);
+      console.log('productos: ', response.response.products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
+  const fetchTotalProducts = async () => {
+    try {
+      const response = await getTotalProductUseCase.run();
+      setTotalProducts(response);
+      console.log('Total de productos: ', response);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
@@ -162,6 +177,7 @@ export default function Home() {
       const response = await createProductUseCase.run(newProductData);
       console.log("Producto creado:", response);
       fetchProducts();
+      fetchTotalProducts();
       handleCloseCreate();
     } catch (error) {
       console.error("Error al crear el producto:", error);
@@ -180,6 +196,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchProducts();
+    fetchTotalProducts();
   }, []);
 
   useEffect(() => {
@@ -205,6 +222,12 @@ export default function Home() {
         </div>
       ) : (
         <ThemeProvider theme={theme}>
+          <RowStyled>
+            <h1>Bienvenido a Platify 🪴</h1>
+            <NotificationContainer>
+              <NotificationsIcon/>
+            </NotificationContainer>
+          </RowStyled>
           <Grid container spacing={2}>
             {currentProducts.length === 0 ? (
               <Grid item xs={12}>

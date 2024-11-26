@@ -17,6 +17,16 @@ class ProductRepo extends IProductRepo {
     }
   }
 
+  async getTotal() {
+    try {
+      const response = await axios.get(`${this.url}s/total`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching los productos:", error.message);
+      throw error;
+    }
+  }
+
   async create(product) {
     try {
       const formData = new FormData();

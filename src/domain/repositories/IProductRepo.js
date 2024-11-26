@@ -2,6 +2,9 @@ class IProductRepo {
   getAll() {
     throw "not implemented";
   }
+  getTotal() {
+    throw "not implemented";
+  }
   create(product) {
     throw "not implemented";
   }
