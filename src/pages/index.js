@@ -11,6 +11,7 @@ import {
   Fab,
   Grid,
   Modal,
+  Pagination,
   TextField,
   ThemeProvider,
   Typography,
@@ -21,6 +22,7 @@ import CreateProductUseCase from "@/application/usecases/CreateProductUseCase";
 import DeleteProductUseCase from "@/application/usecases/DeleteProductUseCase";
 import AddIcon from "@mui/icons-material/Add";
 import Loader from "@/components/Loader";
+import { DescriptionStyled } from "@/styles/Index.style";
 
 const style = {
   position: "absolute",
@@ -61,6 +63,8 @@ export default function Home() {
     price: 0,
     stars: 0,
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(9);
 
   const productRepo = new ProductRepo();
   const getAllProductsUseCase = new GetAllProductUseCase(productRepo);
@@ -94,6 +98,14 @@ export default function Home() {
     } catch (error) {
       console.error("Error fetching products:", error);
     }
+  };
+
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
   };
 
   const onSubmitUpdate = async (event) => {
@@ -194,26 +206,24 @@ export default function Home() {
       ) : (
         <ThemeProvider theme={theme}>
           <Grid container spacing={2}>
-            {products.length === 0 ? (
+            {currentProducts.length === 0 ? (
               <Grid item xs={12}>
                 <Typography variant="h6" align="center" color="#bebebe">
                   No hay productos disponibles.
                 </Typography>
               </Grid>
             ) : (
-              products.map((product, index) => (
+              currentProducts.map((product, index) => (
                 <Grid item xs={12} sm={6} md={4} key={index}>
                   <Card>
                     <CardContent>
                       <Typography gutterBottom variant="h5" component="div">
                         {product.name}
                       </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "text.secondary" }}
+                      <DescriptionStyled
                       >
                         {product.description}
-                      </Typography>
+                      </DescriptionStyled>
                       <Typography
                         variant="body2"
                         sx={{ color: "text.secondary" }}
@@ -253,6 +263,19 @@ export default function Home() {
               ))
             )}
           </Grid>
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+            <Pagination
+              count={Math.ceil(products.length / productsPerPage)}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+              sx={{
+                "& .Mui-selected": {
+                  backgroundColor: "#1A5319"
+                }
+              }}
+            />
+          </Box>
           <Fab
             color="#1A5319"
             aria-label="add"
